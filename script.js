@@ -18,6 +18,10 @@ document.getElementById('break-decrement').addEventListener('click', () => {
     if (breakLength > 1) {
         breakLength--;
         breakLengthElement.textContent = breakLength;
+        if (!isSession && !isRunning) {
+            timeLeft = breakLength * 60;
+            updateTimeLeft();
+        }
     }
 });
 
@@ -25,6 +29,10 @@ document.getElementById('break-increment').addEventListener('click', () => {
     if (breakLength < 60) {
         breakLength++;
         breakLengthElement.textContent = breakLength;
+        if (!isSession && !isRunning) {
+            timeLeft = breakLength * 60;
+            updateTimeLeft();
+        }
     }
 });
 
@@ -33,7 +41,7 @@ document.getElementById('session-decrement').addEventListener('click', () => {
     if (sessionLength > 1) {
         sessionLength--;
         sessionLengthElement.textContent = sessionLength;
-        if (!isRunning) {
+        if (isSession && !isRunning) {
             timeLeft = sessionLength * 60;
             updateTimeLeft();
         }
@@ -44,7 +52,7 @@ document.getElementById('session-increment').addEventListener('click', () => {
     if (sessionLength < 60) {
         sessionLength++;
         sessionLengthElement.textContent = sessionLength;
-        if (!isRunning) {
+        if (isSession && !isRunning) {
             timeLeft = sessionLength * 60;
             updateTimeLeft();
         }
@@ -59,19 +67,23 @@ startStopButton.addEventListener('click', () => {
     } else {
         isRunning = true;
         timerInterval = setInterval(() => {
-            timeLeft--;
-            updateTimeLeft();
-            if (timeLeft < 0) {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateTimeLeft();
+            } else {
                 beep.play();
                 if (isSession) {
+                    // Switch to break
                     isSession = false;
                     timerLabelElement.textContent = 'Break';
                     timeLeft = breakLength * 60;
                 } else {
+                    // Switch to session
                     isSession = true;
                     timerLabelElement.textContent = 'Session';
                     timeLeft = sessionLength * 60;
                 }
+                updateTimeLeft(); // Update the display immediately after switching
             }
         }, 1000);
     }
